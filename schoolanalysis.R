@@ -95,7 +95,7 @@ pub_schools <- pub_schools[pub_schools$Serious.Incidents > 0,]
 chart_schools <- school_df[is.na(school_df$Serious.Incidents),]
 
 
-## PLOT THAT SHIT
+## Plot in GoogleVis (doesn't work due to scale issues)
 
 s1 <- gvisGeoChart(school_df, 
                    locationvar = "Location", 
