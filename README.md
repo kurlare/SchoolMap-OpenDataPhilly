@@ -1,4 +1,5 @@
 ## SchoolMap-OpenDataPhilly
+View the working application here: https://kurlare.shinyapps.io/phillyschoolapp.
 
 This repository contains files to run an interactive map application in Shiny.  It contains four files:
 
