@@ -25,9 +25,9 @@ stu_eth_dem$src_school_id <- as.factor(stu_eth_dem$src_school_id)
 
 ## Get Suspensions and Serious Incidents
 suspensions <- fread('School Profiles Suspensions 2013-2014.txt',
-                        select = c(1,4),
+                        select = c(1,5),
                         header = T)
-colnames(suspensions) <- c("School.ID", "Total.Suspensions")
+colnames(suspensions) <- c("School.ID", "Unique.Suspensions")
 suspensions$School.ID <- as.numeric(suspensions$School.ID)
 
 
@@ -73,21 +73,35 @@ school_df <- data.frame(school_info$Longitude, school_info$Latitude, school_info
 
 school_df <- school_df[!is.na(school_df$school_info.LOCATION_ID),]  ## Removes Private Schools
 colnames(school_df) <- c("Longitude", "Latitude", "School.ID", "Enrollment", "Grade.Level")
+school_df <- left_join(school_df, sch_spr[, 1:4], by = 'School.ID')  ## Add overall city rank
+school_df <- left_join(school_df, ser_inc, by = 'School.ID')  ## Add Serious Incidents, per 100
+school_df$Incidents.Per.100 <- round((school_df$Serious.Incidents/school_df$Enrollment)*100, 2)
 
-school_df <- left_join(school_df, sch_spr, by = 'School.ID')  ## Add City Rankings
-school_df <- left_join(school_df, ser_inc, by = 'School.ID')  ## Add Serious Incidents
-school_df <- left_join(school_df, suspensions, by = 'School.ID')  ## Add Suspensions
+school_df <- left_join(school_df, suspensions, by = 'School.ID')  ## Add Suspensions, per 100
+school_df$Suspensions.Per.100 <- round((school_df$Unique.Suspensions/school_df$Enrollment)*100,2)
+
 school_df <- left_join(school_df, stu_eth_dem, by = 'src_school_id') ## Add Demographics
-school_df <- school_df[, -c(15,16,17)] ## Remove Duplicate columns
+school_df <- school_df[, -c(13,14,15)] ## Remove Duplicate columns
 school_df <- school_df[!is.na(school_df$school_name),] ## Remove rows with empty school names
 
 ## Convert factors to numeric, join numerics, drop factors
 schooldat <- as.data.frame(apply(subset(school_df, select = c(School.ID,Count.Native.American:Percent.White)), 2, as.numeric))
 school_df <- left_join(school_df, schooldat, by = 'School.ID')
-drops <- colnames(school_df)[15:28]
+drops <- colnames(school_df)[13:26]
 school_df <- school_df[, !names(school_df) %in% drops]
 school_df$Longitude <- round(as.numeric(school_df$Longitude), 3)
 school_df$Latitude <- round(as.numeric(school_df$Latitude), 3)
+school_df[, 13:26] <- round(school_df[,13:26], 2) ## Round demographic numbers
+school_df <- school_df[!is.na(school_df$Enrollment.x), ] ## Drop rows with no enrollment
+school_df <- distinct(school_df) ## Remove any duplicates
+
+
+
+## Write to csv
+write.csv(school_df, "compiledschooldata.csv", header = T, stringsAsFactors = F)
+
+
+
 
 ## Subset Charter Schools
 pub_schools <- school_df[!is.na(school_df$Serious.Incidents),]
@@ -95,7 +109,7 @@ pub_schools <- pub_schools[pub_schools$Serious.Incidents > 0,]
 chart_schools <- school_df[is.na(school_df$Serious.Incidents),]
 
 
-## PLOT THAT SHIT
+## GGvis plot (doesn't really work)
 
 s1 <- gvisGeoChart(school_df, 
                    locationvar = "Location", 
