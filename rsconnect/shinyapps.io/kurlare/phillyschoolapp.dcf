@@ -2,6 +2,7 @@ name: phillyschoolapp
 account: kurlare
 server: shinyapps.io
 appId: 71771
-bundleId: 323451
-url: https://kurlare.shinyapps.io/phillyschoolapp
-when: 1449089529.80032
+bundleId: 324065
+url:
+     https://kurlare.shinyapps.io/phillyschoolapp
+when: 1449163359.47313

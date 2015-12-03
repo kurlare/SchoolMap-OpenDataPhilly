@@ -3,12 +3,16 @@
 library(shiny)
 library(DT)
 library(ggplot2)
-library(ggmap)
+library(jsonlite)
 library(leaflet)
 
 school_df <- read.csv("compiledschooldata.csv", header = T, stringsAsFactors = F)
 
-pal  <- colorQuantile(
+citylimits <- readLines("City_Limits.geojson", warn = FALSE) %>%
+    paste(collapse = "\n") %>%
+    fromJSON(simplifyVector = FALSE)
+
+pal <- colorQuantile(
     palette = c("darkgreen", "orange", "red"),
     domain = school_df$Incidents.Per.100,
     n = 6)
@@ -47,7 +51,10 @@ shinyServer(function(input, output) {
     output$philly_map <- renderLeaflet({
       leaflet(data = school_df, width = 500) %>% 
         addProviderTiles("Hydda.Full") %>% 
-        addCircleMarkers(fill = T, radius = ~Enrollment.x * .008, 
+        addGeoJSON(citylimits, 
+                         color = '#666666', 
+                         opacity = 0.55,
+                         fillOpacity = 0.2) %>%addCircleMarkers(fill = T, radius = ~Enrollment.x * .008, 
                          fillOpacity = 0.7,
                          color = ~pal(Incidents.Per.100), 
                          popup = school_popup, 

@@ -18,7 +18,10 @@ shinyUI(fluidPage(theme = "bootstrap.css",
                                             "Check back soon for a more detailed analysis of this data.",
                                             p(),
                                             "All data was compiled from",
-                                            a("OpenDataPhilly.", href="https://www.opendataphilly.org/group/education-group"))
+                                            a("OpenDataPhilly.", href="https://www.opendataphilly.org/group/education-group"),
+                                            p(),
+                                            "Created by",
+                                            a("Rafi Kurlansik.", href = "https://github.com/kurlare"))
                           ),
                   
                           fluidRow(
